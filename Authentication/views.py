@@ -19,7 +19,7 @@ def login_view(request):
                 # Login the user
                 login(request, user)
                 print("SUCESSFUL LOGIN----------------------------------------------------------------")
-                #return redirect("home")
+                return redirect("index:home")
             else:
                 # Authentication failed
                 messages.error(request, "Invalid username or password.")
