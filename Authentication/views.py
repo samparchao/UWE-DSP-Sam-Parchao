@@ -23,9 +23,10 @@ def login_view(request):
             else:
                 # Authentication failed
                 messages.error(request, "Invalid username or password.")
+                print("FAILED LOGIN----------------------------------------------------------------")
     else:
         form = LoginForm()
-    return render(request, 'login.html', {'form': form})
+    return render(request, 'login.html', {'form': form, 'messages': messages.get_messages(request)})
 
 #Standard django logout
 def logout_view(request):
@@ -43,3 +44,15 @@ def registration_view(request):
 		messages.error(request, "Unsuccessful registration. Invalid information.")
 	form = RegisterForm()
 	return render(request, 'signup.html', {'form': form})
+
+def myAccount(request):
+    if request.method == 'POST':
+        form = RegisterForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your account information has been updated.')
+            return redirect('my_account')
+    else:
+        form = RegisterForm(instance=request.user)
+
+    return render(request, 'myAccount.html', {'form': form})
