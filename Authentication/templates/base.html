@@ -14,6 +14,10 @@
 </head>
 
 <body>
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    
     <nav class="navbar navbar-light navbar-expand-lg fixed-top bg-white clean-navbar">
         <div class="container">
             <a class="navbar-brand logo" href="#">NewsReach</a>
@@ -25,7 +29,7 @@
                 <ul class="navbar-nav ms-auto">
                     {% if user.is_authenticated %}
                     <li class="nav-item"><a class="nav-link" href="#">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Articles</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'index:home' %}">Articles</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'myAccount' %}">My Account</a></li>
                     {% endif %}
                 </ul>
@@ -38,13 +42,15 @@
         </div>
     </nav>
 
-    <!-- Messages dropdown -->
     {% if messages %}
-    <ul class="messages">
+    <div class="dropdown-messages">
         {% for message in messages %}
-            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
         {% endfor %}
-    </ul>
+    </div>
     {% endif %}
 
     <div class="container mt-4">

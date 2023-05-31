@@ -19,8 +19,9 @@
                                 {% endif %}
                                 <div class="col-lg-7">
                                     <h3>{{ article.title }}</h3>
-                                    <div class="info"><span class="text-muted">{{article.publishedAt}} on&nbsp;<a href="{{ article.source.url }}" target="_blank">{{article.source.name}}</a></span></div>
+                                    <div class="info"><span class="text-muted">{{ article.publishedAt }} on&nbsp;<a href="{{ article.source.url }}" target="_blank">{{ article.source.name }}</a></span></div>
                                     <p>{{ article.description }}</p>
+                                    <p class="article-sentiment">Sentiment: {{ article.sentiment }}</p>
                                     <a href="{{ article.url }}" class="btn btn-outline-primary btn-sm" target="_blank">Read More</a>
                                 </div>
                             </div>
