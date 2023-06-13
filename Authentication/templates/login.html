@@ -1,25 +1,29 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
-<main class="page login-page">
-    <section class="clean-block clean-form dark">
-        <div class="container">
-            <div class="block-heading">
-                <h2 class="text-info">Log In</h2>
-                <p>Welcome back to NewsReach.</p>
-            </div>
-            <form method="post">
-                {% csrf_token %}
-                <div class="mb-3"><input class="form-control" type="text" id="username" name="username" placeholder="Username"></div>
-                <div class="mb-3"><input class="form-control" type="password" id="password" name="password" placeholder="Password"></div>
-                <div class="mb-3">
-                    <div class="form-check"><input class="form-check-input" type="checkbox" id="checkbox"><label class="form-check-label" for="checkbox">Remember me</label></div>
+    <main class="page login-page">
+        <section class="clean-block clean-form dark">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-md-6">
+                        <div class="block-heading">
+                            <h2 class="text-info">Log In</h2>
+                            <p>Welcome back to NewsReach.</p>
+                        </div>
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="mb-3"><input class="form-control" type="text" id="username" name="username" placeholder="Username"></div>
+                            <div class="mb-3"><input class="form-control" type="password" id="password" name="password" placeholder="Password"></div>
+                            <div class="mb-3">
+                                <div class="form-check"><input class="form-check-input" type="checkbox" id="checkbox"><label class="form-check-label" for="checkbox">Remember me</label></div>
+                            </div>
+                            <div class="text-center">
+                                <button class="btn btn-primary" type="submit">Log In</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <button class="btn btn-primary" type="submit">Log In</button>
-            </form>
-        </div>
-    </section>
-</main>
-
+            </div>
+        </section>
+    </main>
 {% endblock %}

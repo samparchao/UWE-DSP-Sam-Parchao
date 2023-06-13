@@ -46,12 +46,15 @@ def registration_view(request):
 	return render(request, 'signup.html', {'form': form})
 
 def myAccount(request):
+    user = request.user
     if request.method == 'POST':
         form = RegisterForm(request.POST, instance=request.user)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Your account information has been updated.')
-            return redirect('my_account')
+        # update the user's details
+        user.username = request.POST.get('username')
+        user.email = request.POST.get('email')
+        user.first_name = request.POST.get('firstname')
+        user.last_name = request.POST.get('surname')
+        user.save()
     else:
         form = RegisterForm(instance=request.user)
 

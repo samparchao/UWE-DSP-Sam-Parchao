@@ -1,21 +1,45 @@
 {% extends 'base.html' %}
 
+{% block title %}My Account{% endblock %}
+
 {% block content %}
-    <div class="container">
-        <h1 class="mt-4">My Account</h1>
+    <div class="container mt-4">
+        <h1 class="mb-4">My Account</h1>
         {% if messages %}
-            <ul class="messages list-unstyled">
+            <div class="alert alert-info" role="alert">
                 {% for message in messages %}
-                    <li class="alert alert-{{ message.tags }}">
-                        {{ message }}
-                    </li>
+                    {{ message }}
                 {% endfor %}
-            </ul>
+            </div>
         {% endif %}
-        <form method="post" class="mt-4">
+        <form method="post">
             {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <div class="mb-3">
+                <label class="form-label" for="username">Username</label>
+                <input class="form-control" type="text" id="username" name="username" value="{{ form.username.value }}">
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="firstname">First Name</label>
+                <input class="form-control" type="text" id="firstname" name="firstname" value="{{ form.firstname.value }}">
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="surname">Surname</label>
+                <input class="form-control" type="text" id="surname" name="surname" value="{{ form.surname.value }}">
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="email">Email</label>
+                <input class="form-control" type="email" id="email" name="email" value="{{ form.email.value }}">
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="password1">New Password</label>
+                <input class="form-control" type="password" id="password1" name="password1">
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="password2">Confirm Password</label>
+                <input class="form-control" type="password" id="password2" name="password2">
+            </div>
+            <button class="btn btn-primary" type="submit">Save Changes</button>
+            <a class="btn btn-secondary" href="{% url 'index:home' %}">Cancel</a>
         </form>
     </div>
 {% endblock %}

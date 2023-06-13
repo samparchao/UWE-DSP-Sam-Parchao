@@ -23,6 +23,7 @@
                                     <p>{{ article.description }}</p>
                                     <p class="article-sentiment">Sentiment: {{ article.sentiment }}</p>
                                     <a href="{{ article.url }}" class="btn btn-outline-primary btn-sm" target="_blank">Read More</a>
+                                    <a href="{% url 'index:article_details' article.id %}" class="btn btn-outline-primary btn-sm">What are people saying?</a>
                                 </div>
                             </div>
                         </div>

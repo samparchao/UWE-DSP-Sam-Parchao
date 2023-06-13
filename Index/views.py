@@ -1,7 +1,8 @@
 # Create your views here.
 import requests
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from textblob import TextBlob
+from Index.models import Article
 
 def fetch_news_articles(request):
     api_key = 'cbd719bbe559acf8e3bc3f6d08a6417a'
@@ -17,7 +18,8 @@ def fetch_news_articles(request):
     data = response.json()
     articles = data.get('articles', [])
 
-    # Iterate over the articles and fetch the image URL if available
+    # Iterate over the articles and save them to the database
+    saved_articles = []
     for article in articles:
         if 'image' in article:
             image_url = article['image']
@@ -34,11 +36,34 @@ def fetch_news_articles(request):
                 article['sentiment'] = "Negative"
             else:
                 article['sentiment'] = "Positive"
-            
+
+            # Save the article to the database
+            saved_article = Article.objects.create(
+                title=title,
+                content=content,
+                image_url=image_url,
+                sentiment=article['sentiment']
+            )
+            saved_articles.append(saved_article)
+
             print(article['sentiment'])
 
     context = {
-        'articles': articles
+        'articles': saved_articles
     }
 
     return render(request, 'index.html', context)
+
+def article_details(request, article_id):
+    article = get_object_or_404(Article, id=article_id)
+
+    context = {
+        'article': article
+    }
+
+    return render(request, 'article_details.html', context)
+
+
+def home(request):
+    print("HOME PAGE----------------------------------------------------------------")
+    return render(request, 'home.html')
