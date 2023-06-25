@@ -42,7 +42,12 @@ def fetch_news_articles(request):
                 title=title,
                 content=content,
                 image_url=image_url,
-                sentiment=article['sentiment']
+                description=article['description'],
+                url=article['url'],
+                sentiment=article['sentiment'],
+                published_date=article['publishedAt'],
+                source_name=article['source']['name'],
+                source_url=article['source']['url']
             )
             saved_articles.append(saved_article)
 
