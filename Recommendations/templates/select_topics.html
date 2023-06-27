@@ -1,13 +1,23 @@
 {% extends 'base.html' %}
 
-<h1>Select Topics of Interest</h1>
-<form method="post">
-    {% csrf_token %}
-    {% for topic in topics %}
-        <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="topic{{ topic.id }}" name="topics" value="{{ topic.id }}">
-            <label class="form-check-label" for="topic{{ topic.id }}">{{ topic.name }}</label>
-        </div>
-    {% endfor %}
-    <button class="btn btn-primary" type="submit">Save</button>
-</form>
+{% block title %}Select Topics{% endblock %}
+
+{% block content %}
+    <div class="container mt-5 pt-4"> <!-- Added mt-5 and pt-4 classes for top margin and padding -->
+        <h1 class="mt-4 mb-4">Select Topics of Interest</h1>
+        <form method="post">
+            {% csrf_token %}
+            {% if topics %}
+                {% for topic in topics %}
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="topic{{ topic.id }}" name="topics" value="{{ topic.id }}">
+                        <label class="form-check-label" for="topic{{ topic.id }}">{{ topic.name }}</label>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No topics available.</p>
+            {% endif %}
+            <button class="btn btn-primary mt-3" type="submit">Save</button>
+        </form>
+    </div>
+{% endblock %}

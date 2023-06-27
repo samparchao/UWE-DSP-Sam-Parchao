@@ -1,0 +1,15 @@
+<!-- create_topic.html -->
+{% extends 'base.html' %}
+
+{% block title %}Create Topic{% endblock %}
+
+{% block content %}
+    <div class="container mt-5 pt-4">
+        <h1 class="mt-4 mb-4">Create Topic</h1>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button class="btn btn-primary mt-3" type="submit">Create</button>
+        </form>
+    </div>
+{% endblock %}

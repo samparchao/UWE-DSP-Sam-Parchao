@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from Authentication.forms import LoginForm, RegisterForm
+from Recommendations.models import TopicPreference
 
 # Create your views here.
 # Login View
@@ -18,15 +19,23 @@ def login_view(request):
             if user is not None:
                 # Login the user
                 login(request, user)
-                print("SUCESSFUL LOGIN----------------------------------------------------------------")
-                return redirect("index:home")
+                print("SUCCESSFUL LOGIN----------------------------------------------------------------")
+
+                # Check if the user has selected topics
+                topic_preference = TopicPreference.objects.filter(user=user).first()
+                if topic_preference is None:
+                    # User hasn't selected topics, redirect to select topics page
+                    return redirect('recommendations:select_topics')
+                else:
+                    # User has selected topics, redirect to desired page
+                    return redirect('index:home')
             else:
                 # Authentication failed
                 messages.error(request, "Invalid username or password.")
                 print("FAILED LOGIN----------------------------------------------------------------")
     else:
         form = LoginForm()
-    return render(request, 'login.html', {'form': form, 'messages': messages.get_messages(request)})
+    return render(request, 'login.html', {'form': form})
 
 #Standard django logout
 def logout_view(request):

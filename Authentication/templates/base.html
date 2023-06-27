@@ -31,6 +31,9 @@
                     <li class="nav-item"><a class="nav-link" href="{% url 'index:home' %}">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'index:index' %}">Articles</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'myAccount' %}">My Account</a></li>
+                        {% if user.is_superuser %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'recommendations:create-topic' %}">Create Article Topics</a></li>
+                        {% endif %}
                     {% endif %}
                 </ul>
             </div>
