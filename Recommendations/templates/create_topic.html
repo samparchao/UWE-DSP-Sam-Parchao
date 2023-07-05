@@ -11,5 +11,21 @@
             {{ form.as_p }}
             <button class="btn btn-primary mt-3" type="submit">Create</button>
         </form>
+        
+        {% if topics %}
+        <hr>
+        <h2 class="mt-4 mb-4">Existing Topics</h2>
+        <ul class="list-group">
+            {% for topic in topics %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ topic.name }}
+                <form method="post" action="{% url 'recommendations:delete_topic' topic.id %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
     </div>
 {% endblock %}

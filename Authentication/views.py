@@ -40,7 +40,7 @@ def login_view(request):
 #Standard django logout
 def logout_view(request):
     logout(request)
-    return redirect("login")
+    return redirect("authentication:login")
 
 #Registration Function
 def registration_view(request):
@@ -49,7 +49,7 @@ def registration_view(request):
 		if form.is_valid():
 			user = form.save()
 			#login(request, user)
-			return redirect("login")
+			return redirect("authentication:login")
 		messages.error(request, "Unsuccessful registration. Invalid information.")
 	form = RegisterForm()
 	return render(request, 'signup.html', {'form': form})
@@ -68,3 +68,9 @@ def myAccount(request):
         form = RegisterForm(instance=request.user)
 
     return render(request, 'myAccount.html', {'form': form})
+
+def delete_preferences(request):
+    user = request.user
+    TopicPreference.objects.filter(user=user).delete()
+    messages.success(request, 'Topic preferences deleted.')
+    return redirect('recommendations:select_topics')  

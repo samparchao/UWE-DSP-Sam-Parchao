@@ -3,15 +3,23 @@
 {% block title %}Select Topics{% endblock %}
 
 {% block content %}
-    <div class="container mt-5 pt-4"> <!-- Added mt-5 and pt-4 classes for top margin and padding -->
+    <div class="container mt-5 pt-4 mb-5">
         <h1 class="mt-4 mb-4">Select Topics of Interest</h1>
+        <p>Choose your topics of interest and indicate your level of interest for each topic.</p>
         <form method="post">
             {% csrf_token %}
             {% if topics %}
                 {% for topic in topics %}
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="topic{{ topic.id }}" name="topics" value="{{ topic.id }}">
+                        <input class="form-check-input" type="checkbox" id="topic{{ topic.id }}" name="topic" value="{{ topic.id }}" checked>
                         <label class="form-check-label" for="topic{{ topic.id }}">{{ topic.name }}</label>
+                        <select class="form-select" name="rating">
+                            <option value="1">Least Interested</option>
+                            <option value="2">Moderately Interested</option>
+                            <option value="3" selected>Neutral</option>
+                            <option value="4">Interested</option>
+                            <option value="5">Most Interested</option>
+                        </select>
                     </div>
                 {% endfor %}
             {% else %}
@@ -19,5 +27,6 @@
             {% endif %}
             <button class="btn btn-primary mt-3" type="submit">Save</button>
         </form>
+        <a href="{% url 'index:index' %}" class="btn btn-outline-primary mt-3">Skip</a>
     </div>
 {% endblock %}

@@ -3,7 +3,7 @@
 {% block title %}My Account{% endblock %}
 
 {% block content %}
-    <div class="container mt-4">
+    <div class="container mt-4 mb-5">
         <h1 class="mb-4">My Account</h1>
         {% if messages %}
             <div class="alert alert-info" role="alert">
@@ -42,5 +42,9 @@
             <a class="btn btn-secondary" href="{% url 'index:home' %}">Cancel</a>
         </form>
         <a class="btn btn-secondary" href="{% url 'recommendations:select_topics' %}">Edit Topic Choices</a>
+        <form method="post" action="{% url 'authentication:delete_preferences' %}">
+            {% csrf_token %}
+            <button class="btn btn-danger mt-3" type="submit">Delete Topic Preferences</button>
+        </form>
     </div>
 {% endblock %}

@@ -11,6 +11,7 @@ class Article(models.Model):
     published_date = models.DateTimeField(default=None, blank=True, null=True)
     source_name = models.CharField(max_length=255, default=None, blank=True, null=True)
     source_url = models.TextField(default=None, blank=True, null=True)
+    category = models.CharField(max_length=255, default=None, blank=True, null=True)   
 
     def __str__(self):
         return self.title

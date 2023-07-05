@@ -17,4 +17,13 @@
             </div>
         </div>
     </div>
+
+    <div class="container mt-4">
+        <h3>Twitter Feed</h3>
+        <ul class="list-group">
+            {% for tweet in tweets %}
+                <li class="list-group-item">{{ tweet.full_text }}</li>
+            {% endfor %}
+        </ul>
+    </div>
 {% endblock %}

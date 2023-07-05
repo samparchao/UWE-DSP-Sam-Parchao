@@ -9,7 +9,17 @@
                 <div class="block-heading">
                     <h2 class="text-info">News Articles List</h2>
                     <p>These articles were especially picked for you based on your tastes.</p>
+                    <p>Or you can search for something else below.</p>
                 </div>
+                
+                <div class="search-bar mb-4">
+                    <form class="d-flex">
+                        <input class="form-control me-2" type="search" name="q" placeholder="Search" aria-label="Search">
+                        <button class="btn btn-outline-primary me-2" type="submit">Search</button>
+                        <a href="{% url 'index:index' %}" class="btn btn-outline-secondary">Recommendations</a>
+                    </form>
+                </div>
+                
                 <div class="block-content">
                     {% for article in articles %}
                         <div class="clean-blog-post">
@@ -22,7 +32,7 @@
                                     <div class="info"><span class="text-muted">{{ article.published_date }} on&nbsp;<a href="{{ article.source_url }}" target="_blank">{{ article.source_name }}</a></span></div>
                                     <p>{{ article.description }}</p>
                                     <p class="article-sentiment">Sentiment: {{ article.sentiment }}</p>
-                                    <a href="{{ article.url }}" class="btn btn-outline-primary btn-sm" target="_blank">Read More</a>
+                                    <a href="{{ article.url }}" class="btn btn-outline-primary btn-sm" target="_blank">Read Article</a>
                                     <a href="{% url 'index:article_details' article.id %}" class="btn btn-outline-primary btn-sm">What are people saying?</a>
                                 </div>
                             </div>
