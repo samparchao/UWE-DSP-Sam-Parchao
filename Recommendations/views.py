@@ -1,8 +1,123 @@
+import time
 from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from Recommendations.forms import TopicForm
 from Recommendations.models import Topic, TopicPreference
+import requests
+from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
+from Index.models import Article
+from Recommendations.models import Topic
+from textblob import TextBlob
+from django.db.models import Sum
+
+# Define GNews API key
+api_key = 'cbd719bbe559acf8e3bc3f6d08a6417a'
+
+def fetch_articles_from_categories(limit=10):
+    topics = Topic.objects.all()
+    existing_articles = set()  # Set to store existing article titles
+    
+    for topic in topics:
+        print(f"Fetching articles for {topic.name}...")
+        category = str.lower(topic.name)  # Use the topic name as the GNews category
+        url = f"https://gnews.io/api/v4/top-headlines?lang=en&country=any&category={category}&token={api_key}&max={limit}"
+        response = requests.get(url)
+        articles = response.json().get("articles", [])
+        
+        
+        for article_data in articles:
+            article_id = article_data.get("id")
+            title = article_data.get("title")
+            print(article_id, "Article title:", title)
+            
+            # Skip if the article title already exists in the set
+            if title in existing_articles:
+                continue
+            
+            description = article_data.get("description")
+            content = article_data.get("content")
+            url = article_data.get("url")
+            image_url = article_data.get("image")
+            published_date = article_data.get("publishedAt")
+            source_name = article_data.get("source", {}).get("name")
+            source_url = article_data.get("source", {}).get("url")
+            
+            sentiment = TextBlob(content).sentiment.polarity
+            if sentiment == 0:
+                sentiment_label = "Neutral"
+            elif sentiment < 0:
+                sentiment_label = "Negative"
+            else:
+                sentiment_label = "Positive"
+            
+            try:
+                Article.objects.get(id=article_id)
+            except ObjectDoesNotExist:
+                # Create a new article if it doesn't exist
+                Article.objects.create(
+                    id=article_id,
+                    title=title,
+                    description=description,
+                    content=content,
+                    url=url,
+                    image_url=image_url,
+                    sentiment=sentiment_label,
+                    published_date=published_date,
+                    source_name=source_name,
+                    source_url=source_url,
+                    topic=topic
+                )
+            
+            # Add the article title to the existing_articles set
+            existing_articles.add(title)
+        
+        # Delay for 1 second between API requests
+        time.sleep(1)
+
+
+
+def calculate_category_distribution(user):
+    # Define the maximum number of articles to recommend
+    max_article_count = 10
+    # Get the user's TopicPreference ratings
+    topic_preferences = TopicPreference.objects.filter(user=user).select_related('topic')
+
+    # Calculate the total sum of ratings
+    total_ratings_sum = topic_preferences.aggregate(Sum('rating'))['rating__sum']
+
+    category_distribution = {}
+
+    # Calculate the percentage and number of articles for each category
+    for topic_preference in topic_preferences:
+        topic = topic_preference.topic
+        rating = topic_preference.rating
+
+        if total_ratings_sum == 0:
+            percentage = 0.0
+        else:
+            percentage = rating / total_ratings_sum * 100
+
+        articles_count = round(percentage / 100 * max_article_count)  
+
+        category_distribution[topic.name] = {
+            'percentage': percentage,
+            'articles_count': articles_count
+        }
+
+    # Distribute the remaining articles to categories with the highest ratings
+    remaining_articles = max_article_count - sum(category['articles_count'] for category in category_distribution.values())
+    if remaining_articles > 0:
+        sorted_categories = sorted(category_distribution.keys(), key=lambda x: category_distribution[x]['percentage'], reverse=True)
+        for category in sorted_categories:
+            if remaining_articles > 0:
+                category_distribution[category]['articles_count'] += 1
+                remaining_articles -= 1
+            else:
+                break
+
+    return category_distribution
 
 
 def select_topics(request):
@@ -20,12 +135,11 @@ def select_topics(request):
             topic = get_object_or_404(Topic, id=topic_id)
             TopicPreference.objects.create(user=request.user, topic=topic, rating=rating)
 
-        return redirect('index:home')  # Replace 'index' with the appropriate URL name for the index page
+        return redirect('index:home') # Redirect to the home page
     else:
         topics = Topic.objects.all()
         context = {'topics': topics}
         return render(request, 'select_topics.html', context)
-    
 
 
 @staff_member_required
@@ -50,3 +164,8 @@ def delete_topic(request, topic_id):
         messages.success(request, 'Topic deleted successfully.')
     
     return redirect('recommendations:create-topic')
+
+@staff_member_required
+def delete_topic_preferences(request):
+    TopicPreference.objects.all().delete()
+    return redirect('index:staff-page')

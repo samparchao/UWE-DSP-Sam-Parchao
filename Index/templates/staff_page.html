@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Staff Page{% endblock %}
+
+{% block content %}
+    <div class="container mt-5 pt-4">
+        <h1 class="mt-4 mb-4">Staff Page</h1>
+        <div class="text-center">
+            <a href="{% url 'recommendations:create-topic' %}" class="btn btn-primary">Create Topic</a>
+            <form action="{% url 'recommendations:delete-topic-preferences' %}" method="post" class="d-inline">
+                {% csrf_token %}
+                <button class="btn btn-danger" type="submit">Delete Topic Preferences</button>
+            </form>
+            <form action="{% url 'index:delete-articles' %}" method="post" class="d-inline">
+                {% csrf_token %}
+                <button class="btn btn-danger" type="submit">Delete Articles</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}
