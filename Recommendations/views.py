@@ -1,4 +1,5 @@
 import time
+from django.http import HttpResponse
 from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
@@ -18,24 +19,23 @@ api_key = 'cbd719bbe559acf8e3bc3f6d08a6417a'
 def fetch_articles_from_categories(limit=10):
     topics = Topic.objects.all()
     existing_articles = set()  # Set to store existing article titles
-    
+
     for topic in topics:
         print(f"Fetching articles for {topic.name}...")
-        category = str.lower(topic.name)  # Use the topic name as the GNews category - lower case for compatibility with API
+        category = str.lower(topic.name)  # Use the topic name as the GNews category - lowercase for compatibility with API
         url = f"https://gnews.io/api/v4/top-headlines?lang=en&country=any&category={category}&token={api_key}&max={limit}"
         response = requests.get(url)
         articles = response.json().get("articles", [])
-        
-        
+
         for article_data in articles:
             article_id = article_data.get("id")
             title = article_data.get("title")
             print(article_id, "Article title:", title)
-            
+
             # Skip if the article title already exists in the set
             if title in existing_articles:
                 continue
-            
+
             description = article_data.get("description")
             content = article_data.get("content")
             url = article_data.get("url")
@@ -43,7 +43,7 @@ def fetch_articles_from_categories(limit=10):
             published_date = article_data.get("publishedAt")
             source_name = article_data.get("source", {}).get("name")
             source_url = article_data.get("source", {}).get("url")
-            
+
             sentiment = TextBlob(content).sentiment.polarity
             if sentiment == 0:
                 sentiment_label = "Neutral"
@@ -51,36 +51,42 @@ def fetch_articles_from_categories(limit=10):
                 sentiment_label = "Negative"
             else:
                 sentiment_label = "Positive"
-            
-            try:
-                Article.objects.get(id=article_id)
-            except ObjectDoesNotExist:
-                # Create a new article if it doesn't exist
-                Article.objects.create(
-                    id=article_id,
-                    title=title,
-                    description=description,
-                    content=content,
-                    url=url,
-                    image_url=image_url,
-                    sentiment=sentiment_label,
-                    published_date=published_date,
-                    source_name=source_name,
-                    source_url=source_url,
-                    topic=topic
-                )
-            
+
+            existing_articles_with_title = Article.objects.filter(title=title)
+            if existing_articles_with_title.exists():
+                # Skip if an article with the same title already exists
+                continue
+
+            # Create a new article if it doesn't exist
+            Article.objects.create(
+                id=article_id,
+                title=title,
+                description=description,
+                content=content,
+                url=url,
+                image_url=image_url,
+                sentiment=sentiment_label,
+                published_date=published_date,
+                source_name=source_name,
+                source_url=source_url,
+                topic=topic
+            )
+
             # Add the article title to the existing_articles set
             existing_articles.add(title)
-        
+
         # Delay for 1 second between API requests
         time.sleep(1)
+
+    return HttpResponse("Articles fetched successfully.")
+
+
 
 
 
 def calculate_category_distribution(user):
     # Define the maximum number of articles to recommend
-    max_article_count = 10
+    max_article_count = 20
     # Get the user's TopicPreference ratings
     topic_preferences = TopicPreference.objects.filter(user=user).select_related('topic')
 
@@ -140,6 +146,46 @@ def select_topics(request):
         topics = Topic.objects.all()
         context = {'topics': topics}
         return render(request, 'select_topics.html', context)
+
+
+def update_topic_weights(user, article_id, action):
+    article = get_object_or_404(Article, id=article_id)
+    topic = article.topic
+    topic_preference = TopicPreference.objects.filter(user=user, topic=topic).first()
+    
+    # Adjust weight based on the given action
+    if action == 'like':
+        weight_change = 0.25
+    elif action == 'dislike':
+        weight_change = -0.25
+    elif action == 'read':
+        weight_change = 0.15
+    elif action == 'open':
+        weight_change = 0.05
+    else:
+        print(f"Unknown action: {action}")
+        return  # Unknown action
+    
+    if topic_preference:
+        topic_preference.rating += weight_change
+        print(f"Topic preference for {topic.name} updated to {topic_preference.rating}")
+        
+        # Limit the rating to a maximum of 8
+        if topic_preference.rating > 8:
+            topic_preference.rating = 8
+        
+        topic_preference.save()
+
+def perform_action(request, article_id, action):
+    # Process the action and update topic weights
+    update_topic_weights(request, article_id, action)
+    
+    # Track the action in your analytics or logging system
+    # For example, you can log the action in your database or external service
+    
+    # Redirect the user to the appropriate page
+    #return redirect('index:index')  # Or any other desired redirect
+
 
 
 @staff_member_required

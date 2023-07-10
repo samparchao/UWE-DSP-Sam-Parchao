@@ -11,6 +11,7 @@ class Topic(models.Model):
 
 class TopicPreference(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    rating = models.IntegerField(default=0)
+    rating = models.FloatField(default=0) 
     topic = models.ForeignKey(Topic, on_delete=models.DO_NOTHING, null=True, blank=True, default=None)
+
 

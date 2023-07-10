@@ -1,10 +1,12 @@
 # Create your views here.
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 import requests
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.admin.views.decorators import staff_member_required
 from textblob import TextBlob
 from django.contrib import messages
-from Index.models import Article
+from Index.models import Article, Comment
 from django.db.models import Count
 from random import sample
 from Recommendations.models import TopicPreference
@@ -96,6 +98,21 @@ def fetch_news_articles(request):
 
 def article_details(request, article_id):
     article = get_object_or_404(Article, id=article_id)
+    
+    # Retrieve all comments for the article
+    comments = Comment.objects.filter(article=article)
+    
+    # Convert comments to a list of dictionaries
+    comment_list = []
+    for comment in comments:
+        comment_dict = {
+            'id': comment.id,
+            'username': comment.user.username,
+            'time': comment.time.strftime('%b %d, %Y %I:%M %p'), 
+            'content': comment.content,
+            'sentiment': comment.sentiment,
+        }
+        comment_list.append(comment_dict)
 
     # auth = tweepy.OAuthHandler(api_key_tweepy, api_secret_key_tweepy)
     # auth.set_access_token(access_token_tweepy, access_token_tweepy_secret)
@@ -106,9 +123,8 @@ def article_details(request, article_id):
     # for tweet in tweepy.Cursor(api.user_timeline, screen_name='BBCWorld', tweet_mode='extended', lang='en').items(10):
     #     tweet_list.append(tweet)
 
-
-
-    # Place holder for tweets (DUE TO TWITTER API CHANGES, THIS IS NO LONGER POSSIBLE ON THE FREE TIER)
+    
+    # Placeholder for tweets
     tweet_list = [
         {
             'username': '@JohnDoe',
@@ -127,7 +143,8 @@ def article_details(request, article_id):
             'content': 'Not happy about this, but I hope it works out',
         },
     ]
-
+    
+    # Perform sentiment analysis on tweets
     for tweet in tweet_list:
         content = tweet['content']
         sentiment = TextBlob(content).sentiment.polarity
@@ -137,12 +154,13 @@ def article_details(request, article_id):
             tweet['sentiment'] = "Negative"
         else:
             tweet['sentiment'] = "Positive"
-
+    
     context = {
         'article': article,
-        'tweets': tweet_list
+        'tweets': tweet_list,
+        'comments': comment_list,
     }
-
+    
     return render(request, 'article_details.html', context)
 
 def save_article(request, article_id):
@@ -160,7 +178,51 @@ def unsave_article(request, article_id):
     article.saved_by.remove(user)
     article.save()
     messages.success(request, 'Article unsaved successfully!')
-    return redirect('index:index')
+
+    # Get the referer URL from the request headers
+    referer = request.META.get('HTTP_REFERER')
+
+    # Check if the referer URL is from the index:index or index:saved-articles page
+    if referer and (referer.endswith(reverse('index:index')) or referer.endswith(reverse('index:saved-articles'))):
+        return HttpResponseRedirect(referer)
+    else:
+        return redirect('index:index')
+
+def comment(request, article_id):
+    article = get_object_or_404(Article, id=article_id)
+    user = request.user
+    content = request.POST['content']
+    sentiment = TextBlob(content).sentiment.polarity
+    if sentiment == 0:
+        sentiment = "Neutral"
+    elif sentiment < 0:
+        sentiment = "Negative"
+    else:
+        sentiment = "Positive"
+    Comment.objects.create(article=article, user=user, content=content, sentiment=sentiment)
+    messages.success(request, 'Comment posted successfully!')
+    return redirect('index:article_details', article_id=article_id)
+
+def delete_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+    
+    # Check if the user is the owner of the comment
+    if comment.user == request.user:
+        comment.delete()
+        messages.success(request, 'Comment deleted successfully.')
+    else:
+        messages.error(request, 'You are not authorized to delete this comment.')
+    
+    # Redirect back to the article details page
+    return redirect('index:article_details', article_id=comment.article.id)
+
+def view_saved_articles(request):
+    user = request.user
+    articles = Article.objects.filter(saved_by=user)
+    context = {
+        'articles': articles
+    }
+    return render(request, 'saved_articles.html', context)
 
 @staff_member_required
 def staff_page(request):

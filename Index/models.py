@@ -1,6 +1,7 @@
 from django.db import models
 from Recommendations.models import Topic
 from django.contrib.auth.models import User
+from django.utils import timezone
 # Create your models here.
 class Article(models.Model):
     id = models.AutoField(primary_key=True)
@@ -18,3 +19,11 @@ class Article(models.Model):
 
     def __str__(self):
         return self.title
+    
+class Comment(models.Model):
+    id = models.AutoField(primary_key=True)
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    time = models.DateTimeField(default=timezone.now)
+    sentiment = models.CharField(max_length=10, default=None, blank=True, null=True)
+    content = models.TextField()

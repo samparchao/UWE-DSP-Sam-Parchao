@@ -44,15 +44,19 @@ def logout_view(request):
 
 #Registration Function
 def registration_view(request):
-	if request.method == "POST":
-		form = RegisterForm(request.POST)
-		if form.is_valid():
-			user = form.save()
-			#login(request, user)
-			return redirect("authentication:login")
-		messages.error(request, "Unsuccessful registration. Invalid information.")
-	form = RegisterForm()
-	return render(request, 'signup.html', {'form': form})
+    if request.method == "POST":
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            messages.success(request, "Registration successful. Please log in.")
+            return redirect("authentication:login")
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field.capitalize()}: {error}")
+    else:
+        form = RegisterForm()
+    return render(request, 'signup.html', {'form': form})
 
 def myAccount(request):
     user = request.user

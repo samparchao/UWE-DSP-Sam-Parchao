@@ -9,6 +9,14 @@
                 <h2 class="text-info">Registration</h2>
                 <p>Register below in order to see relevant news to you.</p>
             </div>
+            {% if messages %}
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    {% for message in messages %}
+                        {{ message }}
+                    {% endfor %}
+                </div>
+            {% endif %}
             <form method="post">
                 {% csrf_token %}
                 <div class="mb-3"><label class="form-label" for="username">Username</label><input class="form-control item" type="text" id="username" name="username" placeholder="Username"></div>
