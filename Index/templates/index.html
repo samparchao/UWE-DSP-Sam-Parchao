@@ -3,43 +3,70 @@
 {% block title %}News Articles{% endblock %}
 
 {% block content %}
-    <main class="page blog-post-list">
-        <section class="clean-block clean-blog-list dark">
-            <div class="container">
-                <div class="block-heading">
-                    <h2 class="text-info">News Articles List</h2>
-                    <p>These articles were especially picked for you based on your tastes.</p>
-                    <p>Or you can search for something else below.</p>
-                </div>
-                
-                <div class="search-bar mb-4">
-                    <form class="d-flex">
-                        <input class="form-control me-2" type="search" name="q" placeholder="Search" aria-label="Search">
-                        <button class="btn btn-outline-primary me-2" type="submit">Search</button>
-                        <a href="{% url 'index:index' %}" class="btn btn-outline-secondary">Recommendations</a>
-                    </form>
-                </div>
-                
-                <div class="block-content">
-                    {% for article in articles %}
-                        <div class="clean-blog-post">
-                            <div class="row">
-                                {% if article.image_url %}
-                                    <div class="col-lg-5"><img class="rounded img-fluid" src="{{ article.image_url }}"></div>
-                                {% endif %}
-                                <div class="col-lg-7">
-                                    <h3>{{ article.title }}</h3>
-                                    <div class="info"><span class="text-muted">{{ article.published_date }} on&nbsp;<a href="{{ article.source_url }}" target="_blank">{{ article.source_name }}</a></span></div>
-                                    <p>{{ article.description }}</p>
-                                    <p class="article-sentiment">Sentiment: {{ article.sentiment }}</p>
-                                    <a href="{{ article.url }}" class="btn btn-outline-primary btn-sm" target="_blank">Read Article</a>
-                                    <a href="{% url 'index:article_details' article.id %}" class="btn btn-outline-primary btn-sm">What are people saying?</a>
+<main class="page blog-post-list">
+    <section class="clean-block clean-blog-list dark">
+        <div class="container">
+            <div class="block-heading">
+                <h2 class="text-info">News Articles List</h2>
+                <p>These articles were especially picked for you based on your tastes.</p>
+                <p>Or you can search for something else below.</p>
+            </div>
+
+            <div class="search-bar mb-4">
+                <form class="d-flex">
+                    <input class="form-control me-2" type="search" name="q" placeholder="Search" aria-label="Search">
+                    <button class="btn btn-outline-primary me-2" type="submit">Search</button>
+                    <a href="{% url 'index:index' %}" class="btn btn-outline-secondary">Recommendations</a>
+                </form>
+            </div>
+
+            <div class="block-content">
+                {% for article in articles %}
+                <div class="card mb-4">
+                    <div class="row g-0">
+                        {% if article.image_url %}
+                        <div class="col-lg-5 d-flex align-items-center justify-content-center">
+                            <img class="card-img-top" src="{{ article.image_url }}" alt="Article Image">
+                        </div>
+                        {% endif %}
+                        <div class="col-lg-7">
+                            <div class="card-body">
+                                <h3 class="card-title">{{ article.title }}</h3>
+                                <div class="info"><span class="text-muted">{{ article.published_date }} on&nbsp;<a href="{{ article.source_url }}" target="_blank">{{ article.source_name }}</a></span></div>
+                                <p class="card-text">{{ article.description }}</p>
+                                <div class="article-sentiment">
+                                    <span class="badge bg-secondary">Sentiment:</span>
+                                    {% if article.sentiment == 'Positive' %}
+                                        <span class="badge bg-success">Positive</span>
+                                    {% elif article.sentiment == 'Negative' %}
+                                        <span class="badge bg-danger">Negative</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Neutral</span>
+                                    {% endif %}
                                 </div>
+                                <div class="mt-2">
+                                <a href="{{ article.url }}" class="btn btn-outline-primary btn-sm" target="_blank">Read Article</a>
+                                <a href="{% url 'index:article_details' article.id %}" class="btn btn-outline-primary btn-sm">What are people saying?</a>
+                                </div>
+                                <div class="buttons mt-2">
+                                    <button class="btn btn-outline-primary btn-sm like-button">Like</button>
+                                    <button class="btn btn-outline-danger btn-sm dislike-button">Dislike</button>
+                                </div>
+                                <div class="save mt-2">
+                                {% if article.saved_by_current_user %}
+                                    <a href="{% url 'index:unsave-article' article.id %}" class="btn btn-outline-danger btn-sm save-button">Unsave</a>
+                                {% else %}
+                                    <a href="{% url 'index:save-article' article.id %}" class="btn btn-outline-success btn-sm save-button">Save</a>
+                                {% endif %}
+                            </div>
                             </div>
                         </div>
-                    {% endfor %}
+                    </div>
                 </div>
+                {% endfor %}
+
             </div>
-        </section>
-    </main>
+        </div>
+    </section>
+</main>
 {% endblock %}

@@ -21,7 +21,7 @@ def fetch_articles_from_categories(limit=10):
     
     for topic in topics:
         print(f"Fetching articles for {topic.name}...")
-        category = str.lower(topic.name)  # Use the topic name as the GNews category
+        category = str.lower(topic.name)  # Use the topic name as the GNews category - lower case for compatibility with API
         url = f"https://gnews.io/api/v4/top-headlines?lang=en&country=any&category={category}&token={api_key}&max={limit}"
         response = requests.get(url)
         articles = response.json().get("articles", [])

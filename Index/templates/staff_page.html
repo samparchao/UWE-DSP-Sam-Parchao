@@ -15,6 +15,10 @@
                 {% csrf_token %}
                 <button class="btn btn-danger" type="submit">Delete Articles</button>
             </form>
+            <form action="{% url 'recommendations:fetch-articles' %}" method="post" class="d-inline">
+                {% csrf_token %}
+                <button class="btn btn-primary" type="submit">Fetch Articles from Categories</button>
+            </form>
         </div>
     </div>
 {% endblock %}

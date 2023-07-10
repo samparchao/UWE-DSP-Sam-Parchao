@@ -3,27 +3,52 @@
 {% block title %}Article Details{% endblock %}
 
 {% block content %}
-    <div class="container">
-        <div class="row">
-            <div class="col-md-8 offset-md-2">
-                <div class="card">
-                    <div class="card-body">
-                        <h2 class="card-title">{{ article.title }}</h2>
-                        <img src="{{ article.image_url }}" alt="Article Image" class="img-fluid mb-4">
-                        <p class="card-text">{{ article.content }}</p>
-                        <p class="card-text">Sentiment: {{ article.sentiment }}</p>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2 mt-5">
+            <div class="card">
+                <div class="card-body">
+                    <a href="javascript:history.go(-1)" class="btn btn-secondary mb-3">Back</a> <!-- Back button -->
+                    <h2 class="card-title mt-4">{{ article.title }}</h2> 
+                    <img src="{{ article.image_url }}" alt="Article Image" class="img-fluid mb-4">
+                    <p class="card-text">{{ article.content }}</p>
+                    <div class="article-sentiment">
+                        <span class="badge bg-secondary">Sentiment:</span>
+                        {% if article.sentiment == 'Positive' %}
+                            <span class="badge bg-success">Positive</span>
+                        {% elif article.sentiment == 'Negative' %}
+                            <span class="badge bg-danger">Negative</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Neutral</span>
+                        {% endif %}
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="container mt-4">
-        <h3>Twitter Feed</h3>
-        <ul class="list-group">
-            {% for tweet in tweets %}
-                <li class="list-group-item">{{ tweet.full_text }}</li>
-            {% endfor %}
-        </ul>
+<div class="container mt-4"> 
+    <h3>Twitter Feed</h3>
+    <div class="card-deck">
+        {% for tweet in tweets %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="tweet-username">{{ tweet.username }}</div>
+                    <div class="tweet-content">{{ tweet.content }}</div>
+                    <div class="tweet-sentiment">
+                        <span class="badge bg-secondary">Sentiment:</span>
+                        {% if tweet.sentiment == 'Positive' %}
+                            <span class="badge bg-success">Positive</span>
+                        {% elif tweet.sentiment == 'Negative' %}
+                            <span class="badge bg-danger">Negative</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Neutral</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
     </div>
+</div>
 {% endblock %}
