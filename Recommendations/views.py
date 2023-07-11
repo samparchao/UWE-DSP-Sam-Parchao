@@ -1,13 +1,15 @@
 import time
-from django.http import HttpResponse
+import json
+import requests
+import sys
+from io import StringIO
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from Recommendations.forms import TopicForm
-from Recommendations.models import Topic, TopicPreference
-import requests
-from django.utils import timezone
-from django.core.exceptions import ObjectDoesNotExist
+from Recommendations.models import Topic, TopicPreference, UserAction
 from Index.models import Article
 from Recommendations.models import Topic
 from textblob import TextBlob
@@ -16,9 +18,13 @@ from django.db.models import Sum
 # Define GNews API key
 api_key = 'cbd719bbe559acf8e3bc3f6d08a6417a'
 
-def fetch_articles_from_categories(limit=10):
+def fetch_articles_from_categories(limit=10, capture_output=False):
     topics = Topic.objects.all()
     existing_articles = set()  # Set to store existing article titles
+
+    if capture_output:
+        output = StringIO()  # Create a StringIO object to capture the printed output
+        sys.stdout = output  # Redirect the stdout to the StringIO object
 
     for topic in topics:
         print(f"Fetching articles for {topic.name}...")
@@ -78,9 +84,15 @@ def fetch_articles_from_categories(limit=10):
         # Delay for 1 second between API requests
         time.sleep(1)
 
+    if capture_output:
+        sys.stdout = sys.__stdout__  # Restore the original stdout
+        output.seek(0)  # Move the StringIO object's pointer to the beginning
+        print_output = output.getvalue()  # Get the captured printed output as a string
+        output.close()  # Close the StringIO object
+
+        return print_output
+
     return HttpResponse("Articles fetched successfully.")
-
-
 
 
 
@@ -122,6 +134,9 @@ def calculate_category_distribution(user):
                 remaining_articles -= 1
             else:
                 break
+    
+    print("Category distribution:")
+    print(json.dumps(category_distribution, indent=4))
 
     return category_distribution
 
@@ -151,11 +166,16 @@ def select_topics(request):
 def update_topic_weights(user, article_id, action):
     article = get_object_or_404(Article, id=article_id)
     topic = article.topic
-    topic_preference = TopicPreference.objects.filter(user=user, topic=topic).first()
+    
+    # Check if the user has already performed the same action on the article
+    existing_action = UserAction.objects.filter(user=user, article_id=article_id, action=action).exists()
+    if existing_action:
+        print("User has already performed the same action on the article. Skipping weight update.")
+        return
     
     # Adjust weight based on the given action
     if action == 'like':
-        weight_change = 0.25
+        weight_change = 10
     elif action == 'dislike':
         weight_change = -0.25
     elif action == 'read':
@@ -166,6 +186,10 @@ def update_topic_weights(user, article_id, action):
         print(f"Unknown action: {action}")
         return  # Unknown action
     
+    print(f"Updating topic preference for {topic.name} by {weight_change}...")
+    
+    topic_preference = TopicPreference.objects.filter(user=user, topic=topic).first()
+    
     if topic_preference:
         topic_preference.rating += weight_change
         print(f"Topic preference for {topic.name} updated to {topic_preference.rating}")
@@ -175,16 +199,31 @@ def update_topic_weights(user, article_id, action):
             topic_preference.rating = 8
         
         topic_preference.save()
+    
+    # Create a UserAction record to track the action
+    UserAction.objects.create(user=user, article_id=article.id, action=action)
 
-def perform_action(request, article_id, action):
-    # Process the action and update topic weights
-    update_topic_weights(request, article_id, action)
-    
-    # Track the action in your analytics or logging system
-    # For example, you can log the action in your database or external service
-    
-    # Redirect the user to the appropriate page
-    #return redirect('index:index')  # Or any other desired redirect
+
+@login_required
+def record_action(request):
+    print("RECORD ACTION FUNCTION TRIGGERED")
+    print("METHOD:", request.method)
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        article_id = data.get('article_id')
+        print("ARTICLE ID:", article_id)
+        action = data.get('action')
+        print("ACTION:", action)
+        
+        # Pass the user object to the update_topic_weights function
+        update_topic_weights(request.user, article_id, action)
+        
+        # Return a JSON response to indicate success
+        return JsonResponse({'message': 'Action recorded successfully'})
+    else:
+        # Return a JSON response with an error message
+        return JsonResponse({'error': 'Invalid request method'})
+
 
 
 

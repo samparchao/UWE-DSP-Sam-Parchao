@@ -19,6 +19,10 @@
                 {% csrf_token %}
                 <button class="btn btn-primary" type="submit">Fetch Articles from Categories</button>
             </form>
+            <form action="{% url 'index:delete-daily-task-flags' %}" method="post" class="d-inline">
+                {% csrf_token %}
+                <button class="btn btn-primary" type="submit">Delete Daily Flag</button>
+            </form>
         </div>
     </div>
 {% endblock %}

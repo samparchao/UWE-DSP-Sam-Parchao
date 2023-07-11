@@ -1,13 +1,17 @@
+import datetime
 from django.shortcuts import render
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from Authentication.forms import LoginForm, RegisterForm
-from Recommendations.models import TopicPreference
+from Recommendations.models import DailyTaskFlag, TopicPreference
+from Recommendations.views import fetch_articles_from_categories
 
 # Create your views here.
 # Login View
 def login_view(request):
+    print_output = None  # Define print_output variable outside the if block
+
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
@@ -17,6 +21,24 @@ def login_view(request):
             user = authenticate(request, username=username, password=password)
 
             if user is not None:
+                # Check if the news has been fetched for the day
+                today = datetime.date.today()
+                news_fetched_today = DailyTaskFlag.objects.filter(date=today).exists()
+
+                if not news_fetched_today:
+                    # Fetch the news and capture the printed output
+                    import io
+                    from contextlib import redirect_stdout
+
+                    f = io.StringIO()
+                    with redirect_stdout(f):
+                        fetch_articles_from_categories(capture_output=True)
+
+                    print_output = f.getvalue()
+
+                    # Create the flag to mark the news as fetched for the day
+                    DailyTaskFlag.objects.create(date=today)
+
                 # Login the user
                 login(request, user)
                 print("SUCCESSFUL LOGIN----------------------------------------------------------------")
@@ -35,7 +57,11 @@ def login_view(request):
                 print("FAILED LOGIN----------------------------------------------------------------")
     else:
         form = LoginForm()
-    return render(request, 'login.html', {'form': form})
+
+    return render(request, 'login.html', {'form': form, 'print_output': print_output})
+
+
+
 
 #Standard django logout
 def logout_view(request):

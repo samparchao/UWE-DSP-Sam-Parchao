@@ -16,7 +16,7 @@
             <div class="alert alert-info alert-dismissible fade show" role="alert">
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 {% for message in messages %}
-                    {{ message }}
+                {{ message }}
                 {% endfor %}
             </div>
             {% endif %}
@@ -41,33 +41,40 @@
                         <div class="col-lg-7">
                             <div class="card-body">
                                 <h3 class="card-title">{{ article.title }}</h3>
-                                <div class="info"><span class="text-muted">{{ article.published_date }} on&nbsp;<a href="{{ article.source_url }}" target="_blank">{{ article.source_name }}</a></span></div>
+                                <div class="info"><span class="text-muted">{{ article.published_date }} on&nbsp;<a
+                                            href="{{ article.source_url }}" target="_blank">{{ article.source_name }}</a></span></div>
                                 <p class="card-text">{{ article.description }}</p>
                                 <div class="article-sentiment">
                                     <span class="badge bg-secondary">Sentiment:</span>
                                     {% if article.sentiment == 'Positive' %}
-                                        <span class="badge bg-success">Positive</span>
+                                    <span class="badge bg-success">Positive</span>
                                     {% elif article.sentiment == 'Negative' %}
-                                        <span class="badge bg-danger">Negative</span>
+                                    <span class="badge bg-danger">Negative</span>
                                     {% else %}
-                                        <span class="badge bg-secondary">Neutral</span>
+                                    <span class="badge bg-secondary">Neutral</span>
                                     {% endif %}
                                 </div>
                                 <div class="mt-2">
-                                <a href="{{ article.url }}" class="btn btn-outline-primary btn-sm" target="_blank">Read Article</a>
-                                <a href="{% url 'index:article_details' article.id %}" class="btn btn-outline-primary btn-sm">What are people saying?</a>
+                                    <a href="{{ article.url }}" class="btn btn-outline-primary btn-sm"
+                                        onclick="recordAction('{{ article.id }}', 'read')">Read Article</a>
+                                    <a href="{% url 'index:article_details' article.id %}"
+                                        class="btn btn-outline-primary btn-sm" onclick="recordAction('{{ article.id }}', 'open')">What are people saying?</a>
                                 </div>
                                 <div class="buttons mt-2">
-                                    <button class="btn btn-outline-primary btn-sm like-button">Like</button>
-                                    <button class="btn btn-outline-danger btn-sm dislike-button">Dislike</button>
+                                    <button class="btn btn-outline-primary btn-sm like-button"
+                                        onclick="recordAction('{{ article.id }}', 'like')">Like</button>
+                                    <button class="btn btn-outline-danger btn-sm dislike-button"
+                                        onclick="recordAction('{{ article.id }}', 'dislike')">Dislike</button>
                                 </div>
                                 <div class="save mt-2">
-                                {% if article.saved_by_current_user %}
-                                    <a href="{% url 'index:unsave-article' article.id %}" class="btn btn-outline-danger btn-sm save-button">Unsave</a>
-                                {% else %}
-                                    <a href="{% url 'index:save-article' article.id %}" class="btn btn-outline-success btn-sm save-button">Save</a>
-                                {% endif %}
-                            </div>
+                                    {% if article.saved_by_current_user %}
+                                    <a href="{% url 'index:unsave-article' article.id %}"
+                                        class="btn btn-outline-danger btn-sm save-button">Unsave</a>
+                                    {% else %}
+                                    <a href="{% url 'index:save-article' article.id %}"
+                                        class="btn btn-outline-success btn-sm save-button">Save</a>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -78,4 +85,59 @@
         </div>
     </section>
 </main>
+
+<script>
+    function getCookie(name) {
+        // Function to retrieve the value of a cookie by its name
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function recordAction(articleId, action) {
+        console.log("JS ARTICLE ID:", articleId);
+        console.log("JS ACTION:", action);
+
+        const url = "{% url 'recommendations:record-action' %}";  // Update the URL to match your endpoint
+        const data = {
+            article_id: articleId,
+            action: action
+        };
+        const csrftoken = getCookie('csrftoken'); // Get the CSRF token from the cookie
+
+        console.log("CSRF Token:", csrftoken);
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken // Include the CSRF token in the request headers
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => {
+                // Handle response if needed
+                // e.g., update UI or display success message
+            })
+            .catch(error => {
+                // Handle error if needed
+                console.error('Error recording action:', error);
+            });
+    }
+</script>
+
+
+
+
+
+
 {% endblock %}

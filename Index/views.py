@@ -9,7 +9,7 @@ from django.contrib import messages
 from Index.models import Article, Comment
 from django.db.models import Count
 from random import sample
-from Recommendations.models import TopicPreference
+from Recommendations.models import DailyTaskFlag, TopicPreference
 from Recommendations.views import calculate_category_distribution, fetch_articles_from_categories
 
 
@@ -231,6 +231,11 @@ def staff_page(request):
 @staff_member_required
 def delete_articles(request):
     Article.objects.all().delete()
+    return redirect('index:staff-page')
+
+@staff_member_required
+def delete_daily_task_flags(request):
+    DailyTaskFlag.objects.all().delete()
     return redirect('index:staff-page')
 
 

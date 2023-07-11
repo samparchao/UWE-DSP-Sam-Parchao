@@ -13,5 +13,6 @@ urlpatterns = [
     path('unsave-article/<int:article_id>/', views.unsave_article, name='unsave-article'),
     path('comment/<int:article_id>/', views.comment, name='comment'),
     path('delete-comment/<int:comment_id>/', views.delete_comment, name='delete-comment'),
-    path('saved-articles/', views.view_saved_articles, name='saved-articles')
+    path('saved-articles/', views.view_saved_articles, name='saved-articles'),
+    path('delete-daily-task-flags/', views.delete_daily_task_flags, name='delete-daily-task-flags'),
 ]
