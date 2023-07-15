@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'Authentication',
     'Index',
     'Recommendations',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
@@ -74,6 +75,12 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'web_project.wsgi.application'
+
+
+GRAPH_MODELS = {
+    'all_applications': True,
+    'group_models': True,
+}
 
 
 # Database

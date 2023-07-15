@@ -20,67 +20,79 @@
                 {% endfor %}
             </div>
             {% endif %}
-
+            
             <div class="search-bar mb-4">
                 <form class="d-flex">
                     <input class="form-control me-2" type="search" name="q" placeholder="Search" aria-label="Search">
+                    <select class="form-control me-2" name="sentiment">
+                        <option value="">All Sentiments</option>
+                        <option value="positive">Positive</option>
+                        <option value="neutral">Neutral</option>
+                        <option value="negative">Negative</option>
+                    </select>
                     <button class="btn btn-outline-primary me-2" type="submit">Search</button>
                     <a href="{% url 'index:index' %}" class="btn btn-outline-secondary">Recommendations</a>
                 </form>
             </div>
 
             <div class="block-content">
-                {% for article in articles %}
-                <div class="card mb-4">
-                    <div class="row g-0">
-                        {% if article.image_url %}
-                        <div class="col-lg-5 d-flex align-items-center justify-content-center">
-                            <img class="card-img-top" src="{{ article.image_url }}" alt="Article Image">
-                        </div>
-                        {% endif %}
-                        <div class="col-lg-7">
-                            <div class="card-body">
-                                <h3 class="card-title">{{ article.title }}</h3>
-                                <div class="info"><span class="text-muted">{{ article.published_date }} on&nbsp;<a
-                                            href="{{ article.source_url }}" target="_blank">{{ article.source_name }}</a></span></div>
-                                <p class="card-text">{{ article.description }}</p>
-                                <div class="article-sentiment">
-                                    <span class="badge bg-secondary">Sentiment:</span>
-                                    {% if article.sentiment == 'Positive' %}
-                                    <span class="badge bg-success">Positive</span>
-                                    {% elif article.sentiment == 'Negative' %}
-                                    <span class="badge bg-danger">Negative</span>
-                                    {% else %}
-                                    <span class="badge bg-secondary">Neutral</span>
-                                    {% endif %}
-                                </div>
-                                <div class="mt-2">
-                                    <a href="{{ article.url }}" class="btn btn-outline-primary btn-sm"
-                                        onclick="recordAction('{{ article.id }}', 'read')">Read Article</a>
-                                    <a href="{% url 'index:article_details' article.id %}"
-                                        class="btn btn-outline-primary btn-sm" onclick="recordAction('{{ article.id }}', 'open')">What are people saying?</a>
-                                </div>
-                                <div class="buttons mt-2">
-                                    <button class="btn btn-outline-primary btn-sm like-button"
-                                        onclick="recordAction('{{ article.id }}', 'like')">Like</button>
-                                    <button class="btn btn-outline-danger btn-sm dislike-button"
-                                        onclick="recordAction('{{ article.id }}', 'dislike')">Dislike</button>
-                                </div>
-                                <div class="save mt-2">
-                                    {% if article.saved_by_current_user %}
-                                    <a href="{% url 'index:unsave-article' article.id %}"
-                                        class="btn btn-outline-danger btn-sm save-button">Unsave</a>
-                                    {% else %}
-                                    <a href="{% url 'index:save-article' article.id %}"
-                                        class="btn btn-outline-success btn-sm save-button">Save</a>
-                                    {% endif %}
+                {% if articles %}
+                    {% for article in articles %}
+                    <div class="card mb-4">
+                        <div class="row g-0">
+                            {% if article.image_url %}
+                            <div class="col-lg-5 d-flex align-items-center justify-content-center">
+                                <img class="card-img-top" src="{{ article.image_url }}" alt="Article Image">
+                            </div>
+                            {% endif %}
+                            <div class="col-lg-7">
+                                <div class="card-body">
+                                    <h3 class="card-title">{{ article.title }}</h3>
+                                    <div class="info"><span class="text-muted">{{ article.published_date }} on&nbsp;<a
+                                                href="{{ article.source_url }}" target="_blank">{{ article.source_name }}</a></span></div>
+                                    <p class="card-text">{{ article.description }}</p>
+                                    <div class="article-sentiment">
+                                        <span class="badge bg-secondary">Sentiment:</span>
+                                        {% if article.sentiment == 'Positive' %}
+                                        <span class="badge bg-success">Positive</span>
+                                        {% elif article.sentiment == 'Negative' %}
+                                        <span class="badge bg-danger">Negative</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">Neutral</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="mt-2">
+                                        <a href="{{ article.url }}" class="btn btn-outline-primary btn-sm"
+                                            onclick="recordAction('{{ article.id }}', 'read')">Read Article</a>
+                                        <a href="{% url 'index:article_details' article.id %}"
+                                            class="btn btn-outline-primary btn-sm" onclick="recordAction('{{ article.id }}', 'open')">What are people saying?</a>
+                                    </div>
+                                    <div class="buttons mt-2">
+                                        <button class="btn btn-outline-primary btn-sm like-button"
+                                            onclick="recordAction('{{ article.id }}', 'like')">Like</button>
+                                        <button class="btn btn-outline-danger btn-sm dislike-button"
+                                            onclick="recordAction('{{ article.id }}', 'dislike')">Dislike</button>
+                                    </div>
+                                    <div class="save mt-2">
+                                        {% if article.saved_by_current_user %}
+                                        <a href="{% url 'index:unsave-article' article.id %}"
+                                            class="btn btn-outline-danger btn-sm save-button">Unsave</a>
+                                        {% else %}
+                                        <a href="{% url 'index:save-article' article.id %}"
+                                            class="btn btn-outline-success btn-sm save-button">Save</a>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                {% endfor %}
-
+                    {% endfor %}
+                {% else %}
+                    <div class="alert alert-info" role="alert">
+                        No articles available. Please select your preferences to get personalised recommendations.
+                    </div>
+                    <a href="{% url 'recommendations:select_topics' %}" class="btn btn-primary">Select Preferences</a>
+                {% endif %}
             </div>
         </div>
     </section>
@@ -107,7 +119,7 @@
         console.log("JS ARTICLE ID:", articleId);
         console.log("JS ACTION:", action);
 
-        const url = "{% url 'recommendations:record-action' %}";  // Update the URL to match your endpoint
+        const url = "{% url 'recommendations:record-action' %}";  // Endpoint to record the action
         const data = {
             article_id: articleId,
             action: action
@@ -126,7 +138,6 @@
         })
             .then(response => {
                 // Handle response if needed
-                // e.g., update UI or display success message
             })
             .catch(error => {
                 // Handle error if needed
@@ -134,10 +145,4 @@
             });
     }
 </script>
-
-
-
-
-
-
 {% endblock %}

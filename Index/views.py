@@ -87,6 +87,11 @@ def fetch_news_articles(request):
 
             articles.extend(category_articles)
 
+    # Filter articles by sentiment if 'sentiment' parameter is present in the request GET
+    sentiment_filter = request.GET.get('sentiment')
+    if sentiment_filter in ['positive', 'neutral', 'negative']:
+        articles = [article for article in articles if article.sentiment == sentiment_filter.capitalize()]
+
     context = {
         'articles': articles
     }

@@ -175,7 +175,7 @@ def update_topic_weights(user, article_id, action):
     
     # Adjust weight based on the given action
     if action == 'like':
-        weight_change = 10
+        weight_change = 0.25
     elif action == 'dislike':
         weight_change = -0.25
     elif action == 'read':
