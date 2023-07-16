@@ -54,6 +54,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     "debug_toolbar.middleware.DebugToolbarMiddleware",
+    'web_project.middleware.SessionTimeoutMiddleware',
 ]
 
 ROOT_URLCONF = 'web_project.urls'
@@ -112,6 +113,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
+SESSION_EXPIRE_SECONDS = 1800  # 30 minutes
+SESSION_EXPIRE_AFTER_LAST_ACTIVITY = True
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/

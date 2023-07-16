@@ -6,6 +6,7 @@ from django.contrib import messages
 from Authentication.forms import LoginForm, RegisterForm
 from Recommendations.models import DailyTaskFlag, TopicPreference
 from Recommendations.views import fetch_articles_from_categories
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 # Login View
@@ -104,3 +105,12 @@ def delete_preferences(request):
     TopicPreference.objects.filter(user=user).delete()
     messages.success(request, 'Topic preferences deleted.')
     return redirect('recommendations:select_topics')  
+
+@login_required
+def delete_account(request):
+    if request.method == 'POST':
+        # Delete the account logic
+        user = request.user
+        user.delete()
+        messages.success(request, 'Your account has been deleted.')
+        return redirect('authentication:login')  
